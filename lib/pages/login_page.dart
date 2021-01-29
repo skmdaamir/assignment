@@ -1,4 +1,4 @@
-import 'package:assignment/bg_image.dart';
+import 'package:assignment/widgets/bg_image.dart';
 import 'package:assignment/utils/Constants.dart';
 import 'package:flutter/material.dart';
 

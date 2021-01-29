@@ -11,20 +11,13 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   // var myText = "Change me";
-  var url = "https://jsonplaceholder.typicode.com/photos";
-  var data;
 
-  @override
-  void initState() {
-    super.initState();
-    getData();
-  }
-
-  getData() async {
+  Future getData() async {
+    var url = "https://jsonplaceholder.typicode.com/photos";
     var res = await http.get(url);
-    data = jsonDecode(res.body);
+    var data = jsonDecode(res.body);
     print(data);
-    setState(() {});
+    return data;
   }
 
   @override
@@ -43,26 +36,41 @@ class _HomePageState extends State<HomePage> {
           )
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: data != null
-            ? ListView.builder(
+      body: FutureBuilder(
+        future: getData(),
+        builder: (context, snapshot) {
+          switch (snapshot.connectionState) {
+            case ConnectionState.none:
+              return Center(
+                child: Text("Fetch Something"),
+              );
+            case ConnectionState.active:
+            case ConnectionState.waiting:
+              return Center(
+                child: CircularProgressIndicator(),
+              );
+            case ConnectionState.done:
+              if (snapshot.hasError) {
+                return Center(
+                  child: Text("Some Error Occured"),
+                );
+              }
+              return ListView.builder(
                 //GridView.builder also use
                 itemBuilder: (context, index) {
                   return Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: ListTile(
                       title: Text(data[index]["title"]),
-                      subtitle: Text("ID: ${data[index]["id"]}"),
-                      leading: Image.network(data[index]["url"]),
+                      subtitle: Text("ID: ${snapshot.data[index]["id"]}"),
+                      leading: Image.network(snapshot.data[index]["url"]),
                     ),
                   );
                 },
-                itemCount: data.length,
-              )
-            : Center(
-                child: CircularProgressIndicator(),
-              ),
+                itemCount: snapshot.data.length,
+              );
+          }
+        },
       ),
       drawer: MyDrawer(),
       floatingActionButton: FloatingActionButton(
