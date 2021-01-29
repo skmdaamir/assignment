@@ -4,12 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-class HomePage extends StatefulWidget {
+class HomePageSB extends StatefulWidget {
   @override
-  _HomePageState createState() => _HomePageState();
+  _HomePageSBState createState() => _HomePageSBState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageSBState extends State<HomePageSB> {
   // var myText = "Change me";
 
   Future getData() async {
@@ -17,6 +17,12 @@ class _HomePageState extends State<HomePage> {
     var res = await http.get(url);
     var data = jsonDecode(res.body);
     print(data);
+    return data;
+  }
+
+  Stream<List<String>> getStreamData() {
+    var data = Stream<List<String>>.fromIterable(
+        [List<String>.generate(20, (index) => "Item $index")]);
     return data;
   }
 
@@ -36,8 +42,8 @@ class _HomePageState extends State<HomePage> {
           )
         ],
       ),
-      body: FutureBuilder(
-        future: getData(),
+      body: StreamBuilder(
+        stream: getStreamData(),
         builder: (context, snapshot) {
           switch (snapshot.connectionState) {
             case ConnectionState.none:
@@ -61,7 +67,7 @@ class _HomePageState extends State<HomePage> {
                   return Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: ListTile(
-                      title: Text(data[index]["title"]),
+                      title: Text(snapshot.data[index]["title"]),
                       subtitle: Text("ID: ${snapshot.data[index]["id"]}"),
                       leading: Image.network(snapshot.data[index]["url"]),
                     ),
